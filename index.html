@@ -35,7 +35,7 @@
         <div class="container">
             <div class="hero-content">
                 <h1>Hi, I'm Gaurav</h1>
-                <p>A passionate Full Stack Developer specializing in modern web technologies and creating exceptional digital experiences.</p>
+                <p>A passionate data analyst specializing in analyzing and creating exceptional digital experiences.</p>
                 <a href="#contact" class="btn">Get In Touch</a>
             </div>
         </div>
@@ -52,10 +52,10 @@
                     <img src="profilepic.jpg" alt="Professional portrait of a developer">
                 </div>
                 <div class="about-text">
-                    <h3>Full Stack & Data Science Expert</h3>
-                <p>Hello! I'm Gaurav, a passionate full stack developer and data science expert building web applications and data-driven solutions. I specialize in JavaScript technologies across the whole stack including React, Node.js, and MongoDB, as well as Python libraries like Pandas, NumPy, Scikit-learn, and TensorFlow for machine learning and analytics.</p>
-                <p>I enjoy turning complex problems into simple, beautiful, and intuitive designs. My goal is to build scalable products that provide pixel-perfect user experiences.</p>
-                <p>When I'm not coding, you can find me hiking, reading tech blogs, or contributing to open source projects.</p>
+                    <h3> </h3>
+                <p>Hello! About Me I'm Gaurav, a curious and passionate Data Science Fanatic who enjoys building data-driven solutions. I met mastery the Python, and I write or read code mostly in it (also, I use libraries Pandas, NumPy, Scikit-learn and Tensorflow to ML and analysis data). I love turning complex data and problems into simple, meaningful insights.</p>
+                <p>I enjoy turning complex problems into simple, beautiful, and intuitive designs. My goal is to make the problem more simpler to get into.</p>
+                <p>When I'm not working on code, you'll probably find me hiking, reading tech blogs and learning new open-source projects.</p>
                 <a href="#contact" class="btn">Hire Me</a>
                 </div>
             </div>
@@ -80,8 +80,8 @@
                     <div class="skill-icon">
                         <i class="fab fa-react"></i>
                     </div>
-                    <h3>React.js</h3>
-                    <p>Building dynamic and responsive user interfaces with React, Redux, and related libraries.</p>
+                    <h3>Excel</h3>
+                    <p>Data cleaning, Pivot Tables, XLOOKUP, VLOOKUP, Conditional Formatting, Basic Dashboards.</p>
                 </div>
                 <div class="skill-card">
                     <div class="skill-icon">
@@ -307,7 +307,7 @@
                     </div>
                 </div>
                 <div class="contact-form">
-                    <form id="contact-form" novalidate>
+                    <form id="contact-form" novalidate data-emailjs-service="rockaman1982" data-emailjs-template="template_aw951z5">
                         <div class="form-group">
                             <label for="name">Your Name</label>
                             <input type="text" id="name" name="name" placeholder="Enter your name" required>
@@ -340,58 +340,71 @@
         </div>
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-    <!-- EmailJS SDK (client-side email sending) -->
+
+    <!-- EmailJS: include and initialize with your public key -->
     <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
     <script>
         (function(){
-            if (typeof emailjs === 'undefined') {
-                console.warn('EmailJS SDK not loaded.');
-                return;
+            if (window.emailjs) {
+                try { emailjs.init("Y_ionb72BW3jHTLli"); } catch (e) { console.warn('EmailJS init failed', e); }
             }
+        })();
+    </script>
 
-            // TODO: Replace these placeholders with your EmailJS credentials
-            var EMAILJS_PUBLIC_KEY = 'YOUR_PUBLIC_KEY';
-            var EMAILJS_SERVICE_ID = 'YOUR_SERVICE_ID';
-            var EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';
-
-            // Initialize EmailJS (public key)
-            try { emailjs.init(EMAILJS_PUBLIC_KEY); } catch (err) { console.warn(err); }
-
+    <script>
+        (function(){
             var form = document.getElementById('contact-form');
             if (!form) return;
 
+            // To use EmailJS client-side, set these attributes on the form element:
+            // data-emailjs-service="your_service_id" data-emailjs-template="your_template_id"
+
             form.addEventListener('submit', function(e){
                 e.preventDefault();
-
-                // Use built-in validation first
                 if (!form.checkValidity()) { form.reportValidity(); return; }
 
-                var name = document.getElementById('name').value.trim();
-                var email = document.getElementById('email').value.trim();
-                var message = document.getElementById('message').value.trim();
+                var payload = {
+                    name: document.getElementById('name').value.trim(),
+                    email: document.getElementById('email').value.trim(),
+                    message: document.getElementById('message').value.trim()
+                };
 
-                if (!EMAILJS_PUBLIC_KEY || EMAILJS_PUBLIC_KEY === 'YOUR_PUBLIC_KEY' ||
-                    !EMAILJS_SERVICE_ID || EMAILJS_SERVICE_ID === 'YOUR_SERVICE_ID' ||
-                    !EMAILJS_TEMPLATE_ID || EMAILJS_TEMPLATE_ID === 'YOUR_TEMPLATE_ID') {
-                    alert('EmailJS is not configured. To send via Gmail, set EmailJS service/template/public key in the script.');
+                var serviceId = form.dataset.emailjsService;
+                var templateId = form.dataset.emailjsTemplate;
+
+                if (window.emailjs && serviceId && templateId) {
+                    // Use sendForm to post the form fields directly to EmailJS
+                    emailjs.sendForm(serviceId, templateId, form)
+                        .then(function(response){
+                            alert('Message sent successfully!');
+                            form.reset();
+                        }, function(error){
+                            console.error('EmailJS sendForm error', error);
+                            alert('Failed to send message via EmailJS');
+                        });
                     return;
                 }
 
-                var templateParams = {
-                    from_name: name,
-                    from_email: email,
-                    message: message,
-                    to_email: 'rockaman1982@gmail.com'
-                };
-
-                emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
-                    .then(function(response){
+                // Fallback: send to local server endpoint
+                fetch('http://127.0.0.1:3000/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                })
+                .then(function(res){ return res.json().then(function(body){ return { status: res.status, body }; }); })
+                .then(function(r){
+                    if (r.status === 200 && r.body.ok) {
                         alert('Message sent — thank you!');
                         form.reset();
-                    }, function(error){
-                        console.error('EmailJS error:', error);
-                        alert('Failed to send message. Check EmailJS configuration and console for details.');
-                    });
+                    } else {
+                        console.error('Send failed', r.body);
+                        alert('Failed to send message: ' + (r.body && r.body.error ? r.body.error : 'Server error'));
+                    }
+                })
+                .catch(function(err){
+                    console.error('Network error', err);
+                    alert('Network error while sending message.');
+                });
             });
         })();
     </script>
