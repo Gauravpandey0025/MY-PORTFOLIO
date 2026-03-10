@@ -682,6 +682,7 @@ footer {
         grid-template-columns: 1fr;
         text-align: center;
         padding: 40px 20px;
+        margin-top: 80px; /* Push content down on mobile so header doesn't overlap */
     }
 
     .hero-text h1 {
